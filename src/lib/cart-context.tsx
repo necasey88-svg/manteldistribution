@@ -10,18 +10,22 @@ import {
 } from "react";
 
 export interface CartLine {
+  lineKey: string;
   slug: string;
   name: string;
   sku: string;
   priceCents: number;
   qty: number;
+  finish?: string;
+  color?: string;
+  hearth?: string;
 }
 
 interface CartContextValue {
   lines: CartLine[];
   addLine: (line: Omit<CartLine, "qty">, qty?: number) => void;
-  updateQty: (slug: string, qty: number) => void;
-  removeLine: (slug: string) => void;
+  updateQty: (lineKey: string, qty: number) => void;
+  removeLine: (lineKey: string) => void;
   clear: () => void;
   subtotalCents: number;
   itemCount: number;
@@ -52,26 +56,26 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addLine = useCallback((line: Omit<CartLine, "qty">, qty = 1) => {
     setLines((prev) => {
-      const existing = prev.find((l) => l.slug === line.slug);
+      const existing = prev.find((l) => (l.lineKey ?? l.slug) === line.lineKey);
       if (existing) {
         return prev.map((l) =>
-          l.slug === line.slug ? { ...l, qty: l.qty + qty } : l
+          (l.lineKey ?? l.slug) === line.lineKey ? { ...l, qty: l.qty + qty } : l
         );
       }
       return [...prev, { ...line, qty }];
     });
   }, []);
 
-  const updateQty = useCallback((slug: string, qty: number) => {
+  const updateQty = useCallback((lineKey: string, qty: number) => {
     setLines((prev) =>
       qty <= 0
-        ? prev.filter((l) => l.slug !== slug)
-        : prev.map((l) => (l.slug === slug ? { ...l, qty } : l))
+        ? prev.filter((l) => (l.lineKey ?? l.slug) !== lineKey)
+        : prev.map((l) => ((l.lineKey ?? l.slug) === lineKey ? { ...l, qty } : l))
     );
   }, []);
 
-  const removeLine = useCallback((slug: string) => {
-    setLines((prev) => prev.filter((l) => l.slug !== slug));
+  const removeLine = useCallback((lineKey: string) => {
+    setLines((prev) => prev.filter((l) => (l.lineKey ?? l.slug) !== lineKey));
   }, []);
 
   const clear = useCallback(() => setLines([]), []);

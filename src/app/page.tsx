@@ -1,7 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Box, Building2, Palette, Store, Truck } from "lucide-react";
 import { Container } from "@/components/container";
+import { HomeHeroShowcase } from "@/components/home-hero-showcase";
 import { ProductCard } from "@/components/product-card";
 import { products } from "@/lib/data/products";
 
@@ -9,15 +9,15 @@ export default function Home() {
   const featured = products.filter(p => p.featured);
   return <>
     <section className="hero-shell">
-      <Container className="grid min-h-[720px] items-stretch lg:grid-cols-[1.05fr_.95fr]">
-        <div className="flex flex-col justify-center py-20 lg:pr-16">
+      <Container className="hero-layout">
+        <div className="hero-copy">
           <p className="eyebrow">Trade-only · Nationwide distribution</p>
           <h1 className="mt-5 max-w-3xl font-serif text-5xl leading-[.98] text-white sm:text-6xl lg:text-7xl">Ten mantels.<br/><em className="font-normal text-clay">One stronger floor.</em></h1>
           <p className="mt-7 max-w-xl text-lg leading-8 text-white/72">A deliberately edited collection of precast fireplace mantels for hearth shops, contractors, interior designers, and national home-furnishings programs.</p>
           <div className="mt-9 flex flex-wrap gap-3"><Link href="/become-a-dealer" className="button-primary">Open a trade account <ArrowRight size={16}/></Link><Link href="/products" className="button-ghost">Explore the line</Link></div>
-          <div className="mt-12 grid grid-cols-3 gap-5 border-t border-white/15 pt-7 text-white"><div><strong className="stat">10</strong><span className="stat-label">launch SKUs</span></div><div><strong className="stat">48</strong><span className="stat-label">states served</span></div><div><strong className="stat">16–24</strong><span className="stat-label">day production</span></div></div>
+          <div className="hero-stats"><div><strong className="stat">10</strong><span className="stat-label">curated profiles</span></div><div><strong className="stat">3</strong><span className="stat-label">finish systems</span></div><div><strong className="stat">2</strong><span className="stat-label">hearth edges</span></div></div>
         </div>
-        <div className="relative min-h-[460px] overflow-hidden lg:min-h-full"><Image src="/products/barossa.jpg" alt="Barossa precast mantel" fill priority className="object-cover" sizes="(max-width:1024px) 100vw, 50vw"/><div className="absolute inset-0 bg-gradient-to-t from-ink/55 via-transparent to-transparent"/><div className="absolute bottom-8 left-8 right-8 flex items-end justify-between text-white"><div><p className="eyebrow text-white/70">Showroom statement</p><p className="mt-1 font-serif text-3xl">The Barossa</p></div><Link href="/products/barossa" className="round-link" aria-label="View Barossa"><ArrowRight/></Link></div></div>
+        <HomeHeroShowcase />
       </Container>
     </section>
 

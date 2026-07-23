@@ -22,7 +22,15 @@ export default function DealerCartPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          lines: lines.map((l) => ({ sku: l.sku, qty: l.qty })),
+          lines: lines.map((l) => ({
+            sku: l.sku,
+            name: l.name,
+            finish: l.finish,
+            color: l.color,
+            hearth: l.hearth,
+            qty: l.qty,
+            unitPriceCents: l.priceCents,
+          })),
           notes: notes || undefined,
         }),
       });
@@ -60,22 +68,23 @@ export default function DealerCartPage() {
         <h1 className="text-2xl font-bold text-ink mb-6">Purchase Order Cart</h1>
         <div className="divide-y divide-line border-y border-line">
           {lines.map((line) => (
-            <div key={line.slug} className="py-4 flex items-center gap-4">
+            <div key={line.lineKey ?? line.slug} className="py-4 flex items-center gap-4">
               <div className="flex-1">
                 <span className="font-medium text-ink">{line.name}</span>
                 <p className="text-xs text-ink-soft">SKU {line.sku}</p>
+                {line.finish && <p className="text-xs text-ink-soft">{line.finish} · {line.color} · {line.hearth}</p>}
               </div>
               <input
                 type="number"
                 min={0}
                 value={line.qty}
-                onChange={(e) => updateQty(line.slug, Number(e.target.value))}
+                onChange={(e) => updateQty(line.lineKey ?? line.slug, Number(e.target.value))}
                 className="w-16 rounded-sm border border-line px-2 py-1 text-sm"
               />
               <span className="w-24 text-right font-medium text-ink">
                 {formatCurrency(line.priceCents * line.qty)}
               </span>
-              <button onClick={() => removeLine(line.slug)} className="text-xs text-ink-soft hover:text-warn">
+              <button onClick={() => removeLine(line.lineKey ?? line.slug)} className="text-xs text-ink-soft hover:text-warn">
                 Remove
               </button>
             </div>
@@ -92,8 +101,8 @@ export default function DealerCartPage() {
           <span className="font-semibold text-ink">{formatCurrency(subtotalCents)}</span>
         </div>
         <p className="mt-1 text-xs text-ink-soft">
-          Freight and applicable net terms are confirmed on the order
-          acknowledgment after submission.
+          Freight, optional hearth pricing, and applicable net terms are confirmed
+          on the order acknowledgment after submission.
         </p>
 
         <label className="mt-5 block text-xs font-medium text-ink-soft uppercase tracking-wide">

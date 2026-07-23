@@ -14,6 +14,7 @@ export function AddToCartButton({ product }: { product: Product }) {
       disabled={!product.inStock}
       onClick={() => {
         addLine({
+          lineKey: product.slug,
           slug: product.slug,
           name: product.name,
           sku: product.sku,

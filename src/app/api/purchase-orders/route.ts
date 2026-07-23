@@ -1,15 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { manufacturingCatalog, manufacturingColor, manufacturingFinish } from "@/lib/data/manufacturing-map";
 import { getProductBySku } from "@/lib/data/products";
 
-// Clients send only sku + qty; unit pricing is resolved server-side
-// from the catalog so a tampered request can't set its own price.
+// Clients send only sku + configuration + qty; product name and unit
+// pricing are resolved server-side so a tampered request can't set its
+// own price.
 const PurchaseOrderSchema = z.object({
   lines: z
     .array(
       z.object({
         sku: z.string(),
+        finish: z.string(),
+        color: z.string(),
+        hearth: z.enum(["No Hearth", "Ogee Edge Hearth", "Square Edge Hearth"]),
         qty: z.number().int().positive(),
       })
     )
@@ -33,6 +38,23 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const unmapped = parsed.data.lines.find((line) => !manufacturingCatalog[line.sku] || !manufacturingFinish[line.finish] || !manufacturingColor[line.color]);
+  if (unmapped) {
+    return NextResponse.json({ error: `Product configuration cannot be sent to manufacturing: ${unmapped.sku}` }, { status: 400 });
+  }
+
+  const pricedLines = [];
+  for (const line of parsed.data.lines) {
+    const product = getProductBySku(line.sku);
+    if (!product) {
+      return NextResponse.json(
+        { error: `Unknown product SKU: ${line.sku}` },
+        { status: 400 }
+      );
+    }
+    pricedLines.push({ ...line, name: product.name, unitPriceCents: product.priceCents });
+  }
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -53,23 +75,6 @@ export async function POST(request: NextRequest) {
       { error: "No dealer account found for this user." },
       { status: 403 }
     );
-  }
-
-  const pricedLines = [];
-  for (const line of parsed.data.lines) {
-    const product = getProductBySku(line.sku);
-    if (!product) {
-      return NextResponse.json(
-        { error: `Unknown product SKU: ${line.sku}` },
-        { status: 400 }
-      );
-    }
-    pricedLines.push({
-      sku: product.sku,
-      name: product.name,
-      qty: line.qty,
-      unitPriceCents: product.priceCents,
-    });
   }
 
   const subtotalCents = pricedLines.reduce(
@@ -102,7 +107,7 @@ export async function POST(request: NextRequest) {
       pricedLines.map((l) => ({
         purchase_order_id: po.id,
         product_sku: l.sku,
-        product_name: l.name,
+        product_name: `${manufacturingCatalog[l.sku].model} | ${manufacturingFinish[l.finish]} | ${manufacturingColor[l.color]} | ${l.hearth} (Hearthline: ${l.name} | ${l.finish} | ${l.color} | ${l.hearth})`,
         qty: l.qty,
         unit_price_cents: l.unitPriceCents,
       }))

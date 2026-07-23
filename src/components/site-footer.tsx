@@ -21,6 +21,7 @@ export function SiteFooter() {
             <li><Link href="/products?style=contemporary" className="hover:text-white">Contemporary</Link></li>
             <li><Link href="/products?style=traditional" className="hover:text-white">Traditional</Link></li>
             <li><Link href="/products" className="hover:text-white">The Hearthline Ten</Link></li>
+            <li><Link href="/finishes" className="hover:text-white">Finishes & Colors</Link></li>
           </ul>
         </div>
 

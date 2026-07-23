@@ -19,10 +19,7 @@ export default function CartPage() {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          lines: lines.map((l) => ({ slug: l.slug, qty: l.qty })),
-          email: email || undefined,
-        }),
+        body: JSON.stringify({ lines, email: email || undefined }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Checkout failed");
@@ -57,7 +54,7 @@ export default function CartPage() {
         <h1 className="text-2xl font-bold text-ink mb-6">Your Cart</h1>
         <div className="divide-y divide-line border-y border-line">
           {lines.map((line) => (
-            <div key={line.slug} className="py-4 flex items-center gap-4">
+            <div key={line.lineKey ?? line.slug} className="py-4 flex items-center gap-4">
               <div className="flex-1">
                 <Link href={`/products/${line.slug}`} className="font-medium text-ink hover:text-ember-dark">
                   {line.name}
@@ -68,14 +65,14 @@ export default function CartPage() {
                 type="number"
                 min={0}
                 value={line.qty}
-                onChange={(e) => updateQty(line.slug, Number(e.target.value))}
+                onChange={(e) => updateQty(line.lineKey ?? line.slug, Number(e.target.value))}
                 className="w-16 rounded-sm border border-line px-2 py-1 text-sm"
               />
               <span className="w-24 text-right font-medium text-ink">
                 {formatCurrency(line.priceCents * line.qty)}
               </span>
               <button
-                onClick={() => removeLine(line.slug)}
+                onClick={() => removeLine(line.lineKey ?? line.slug)}
                 className="text-xs text-ink-soft hover:text-warn"
               >
                 Remove
