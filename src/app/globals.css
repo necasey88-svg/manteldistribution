@@ -65,6 +65,7 @@ a, button { transition: color .2s, background-color .2s, border-color .2s, trans
   position: relative;
   z-index: 1;
   display: grid;
+  width: 100%;
   min-height: 760px;
   align-items: stretch;
 }
@@ -92,12 +93,12 @@ a, button { transition: color .2s, background-color .2s, border-color .2s, trans
 }
 .hero-showcase-main {
   position: absolute;
-  inset: 0 9.25rem 0 0;
+  inset: 0 8rem 0 0;
   overflow: hidden;
 }
 .hero-showcase-image {
-  object-fit: cover;
-  object-position: center;
+  object-fit: contain;
+  object-position: center bottom;
   animation: hero-image-in .45s ease-out;
 }
 .hero-showcase-vignette {
@@ -145,7 +146,7 @@ a, button { transition: color .2s, background-color .2s, border-color .2s, trans
   right: 0;
   bottom: 0;
   display: grid;
-  width: 9.25rem;
+  width: 8rem;
   grid-template-rows: repeat(4, minmax(0, 1fr));
   gap: 1px;
   padding-left: 1px;
@@ -191,7 +192,7 @@ a, button { transition: color .2s, background-color .2s, border-color .2s, trans
   position: absolute;
   z-index: 2;
   top: 0;
-  right: 9.25rem;
+  right: 8rem;
   display: flex;
   min-width: 9rem;
   flex-direction: column;
@@ -216,9 +217,12 @@ a, button { transition: color .2s, background-color .2s, border-color .2s, trans
   to { opacity: 1; transform: scale(1); }
 }
 @media (min-width: 1024px) {
-  .hero-layout { grid-template-columns: .9fr 1.1fr; }
-  .hero-copy { padding-right: 4.5rem; }
-  .hero-showcase { min-height: 760px; }
+  .container-page.hero-layout {
+    max-width: 92rem;
+    grid-template-columns: .76fr 1.24fr;
+  }
+  .hero-copy { padding-right: 4rem; }
+  .hero-showcase { min-height: 720px; }
 }
 @media (max-width: 1023px) {
   .hero-layout { padding-bottom: 2rem; }
@@ -229,6 +233,7 @@ a, button { transition: color .2s, background-color .2s, border-color .2s, trans
   .hero-stats { margin-top: 2.25rem; }
   .hero-showcase { min-height: 500px; }
   .hero-showcase-main { inset: 0 0 6.5rem; }
+  .hero-showcase-image { object-position: center; }
   .hero-showcase-rail {
     top: auto;
     left: 0;
