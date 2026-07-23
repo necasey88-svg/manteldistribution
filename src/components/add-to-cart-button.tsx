@@ -24,7 +24,7 @@ export function AddToCartButton({ product }: { product: Product }) {
       }}
       className="inline-flex items-center justify-center rounded-sm bg-ink px-6 py-3 text-sm font-semibold text-white hover:bg-steel-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
     >
-      {!product.inStock ? "Made to Order — Contact Us" : added ? "Added ✓" : "Add to Cart (MSRP)"}
+      {!product.inStock ? "Request production slot" : added ? "Added" : "Add sample order (MSRP)"}
     </button>
   );
 }

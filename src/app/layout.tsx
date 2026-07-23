@@ -6,11 +6,11 @@ import { CartProvider } from "@/lib/cart-context";
 
 export const metadata: Metadata = {
   title: {
-    default: "Hearthline Supply Co. | Wholesale Precast & Wood Mantel Distribution",
+    default: "Hearthline Supply Co. | Trade-Only Precast Mantel Distribution",
     template: "%s | Hearthline Supply Co.",
   },
   description:
-    "Nationwide wholesale distribution of precast and wood fireplace mantels for dealers, retailers, and trade accounts. We ship — we don't install.",
+    "A focused collection of ten precast fireplace mantels for hearth dealers, contractors, designers, and national home-furnishings accounts.",
 };
 
 export default function RootLayout({

@@ -22,12 +22,7 @@ export default function DealerCartPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          lines: lines.map((l) => ({
-            sku: l.sku,
-            name: l.name,
-            qty: l.qty,
-            unitPriceCents: l.priceCents,
-          })),
+          lines: lines.map((l) => ({ sku: l.sku, qty: l.qty })),
           notes: notes || undefined,
         }),
       });

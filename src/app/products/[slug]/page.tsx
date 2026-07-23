@@ -1,96 +1,14 @@
-import { notFound } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
-import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { ArrowLeft, Check, PackageCheck, Truck } from "lucide-react";
 import { Container } from "@/components/container";
-import { MaterialBadge } from "@/components/material-badge";
 import { AddToCartButton } from "@/components/add-to-cart-button";
-import { getProductBySlug, products } from "@/lib/data/products";
 import { formatCurrency } from "@/lib/utils";
+import { getProductBySlug, products } from "@/lib/data/products";
 
-export function generateStaticParams() {
-  return products.map((p) => ({ slug: p.slug }));
-}
-
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}): Promise<Metadata> {
-  const { slug } = await params;
-  const product = getProductBySlug(slug);
-  if (!product) return {};
-  return {
-    title: product.name,
-    description: product.description,
-  };
-}
-
-export default async function ProductDetailPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = await params;
-  const product = getProductBySlug(slug);
-  if (!product) notFound();
-
-  return (
-    <Container className="py-16">
-      <Link href="/products" className="text-sm text-ink-soft hover:text-ink">
-        &larr; Back to catalog
-      </Link>
-
-      <div className="mt-6 grid lg:grid-cols-2 gap-12">
-        <div className="aspect-[4/3] rounded-md bg-paper-dim border border-line flex items-center justify-center text-ink-soft text-sm">
-          Product photography placeholder
-        </div>
-
-        <div>
-          <MaterialBadge material={product.material} />
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-ink">
-            {product.name}
-          </h1>
-          <p className="mt-1 text-ink-soft">{product.collection} &middot; SKU {product.sku}</p>
-
-          <p className="mt-5 text-ink-soft leading-relaxed">
-            {product.description}
-          </p>
-
-          <div className="mt-6 flex items-baseline gap-3">
-            <span className="text-2xl font-bold text-ink">
-              {formatCurrency(product.msrpCents)}
-            </span>
-            <span className="text-sm text-ink-soft">MSRP</span>
-          </div>
-          <p className="text-sm text-ok mt-1">
-            Dealer net: {formatCurrency(product.priceCents)} &mdash;{" "}
-            <Link href="/dealer/login" className="underline hover:text-ember-dark">
-              sign in to order at dealer pricing
-            </Link>
-          </p>
-
-          <div className="mt-6">
-            <AddToCartButton product={product} />
-          </div>
-
-          <dl className="mt-10 grid grid-cols-2 gap-y-4 gap-x-6 text-sm border-t border-line pt-6">
-            <dt className="text-ink-soft">Dimensions</dt>
-            <dd className="text-ink font-medium">{product.dimensions}</dd>
-            <dt className="text-ink-soft">Weight</dt>
-            <dd className="text-ink font-medium">{product.weightLbs} lbs</dd>
-            <dt className="text-ink-soft">Lead time</dt>
-            <dd className="text-ink font-medium">{product.leadTimeDays} days</dd>
-            <dt className="text-ink-soft">Min. order qty</dt>
-            <dd className="text-ink font-medium">{product.minOrderQty} unit(s)</dd>
-            <dt className="text-ink-soft">Finish options</dt>
-            <dd className="text-ink font-medium">{product.finish.join(", ")}</dd>
-            <dt className="text-ink-soft">Availability</dt>
-            <dd className="text-ink font-medium">
-              {product.inStock ? "In production — standard lead time" : "Made to order"}
-            </dd>
-          </dl>
-        </div>
-      </div>
-    </Container>
-  );
+export function generateStaticParams(){return products.map(p=>({slug:p.slug}));}
+export default async function ProductPage({params}:{params:Promise<{slug:string}>}){
+ const {slug}=await params; const p=getProductBySlug(slug); if(!p) notFound();
+ return <Container className="py-10"><Link href="/products" className="inline-flex items-center gap-2 text-sm text-ink-soft hover:text-ink"><ArrowLeft size={15}/> All ten mantels</Link><div className="mt-8 grid gap-12 lg:grid-cols-[1.1fr_.9fr]"><div className="relative aspect-[4/3] overflow-hidden bg-stone-100"><Image src={p.image} alt={`${p.name} precast mantel`} fill priority className="object-cover" sizes="(max-width:1024px) 100vw, 55vw"/></div><div className="lg:py-4"><p className="eyebrow text-ember">{p.collection} · {p.sku}</p><h1 className="mt-3 font-serif text-5xl">{p.name}</h1><p className="mt-5 text-lg leading-8 text-ink-soft">{p.description}</p><div className="mt-7 rounded-sm bg-cream p-5"><p className="text-xs uppercase tracking-[.15em] text-ember">Why dealers carry it</p><p className="mt-2 text-sm leading-6 text-ink">{p.dealerStory}</p></div><div className="mt-8 grid grid-cols-2 gap-6 border-y border-line py-6"><div><p className="text-xs text-ink-soft">Dealer / suggested retail</p><p className="mt-1 text-xl font-semibold">{formatCurrency(p.priceCents)} <span className="font-normal text-ink-soft">/ {formatCurrency(p.msrpCents)}</span></p></div><div><p className="text-xs text-ink-soft">Production lead</p><p className="mt-1 text-xl font-semibold">{p.leadTimeDays} days</p></div></div><dl className="mt-6 grid gap-4 text-sm sm:grid-cols-2"><div><dt className="text-ink-soft">Typical size range</dt><dd className="font-medium">{p.dimensions}</dd></div><div><dt className="text-ink-soft">Approx. ship weight</dt><dd className="font-medium">{p.weightLbs} lb + crate</dd></div><div><dt className="text-ink-soft">Minimum order</dt><dd className="font-medium">{p.minOrderQty} unit</dd></div><div><dt className="text-ink-soft">Availability</dt><dd className="font-medium">{p.inStock?"Core production":"Scheduled production"}</dd></div></dl><div className="mt-7"><p className="text-xs text-ink-soft">Standard finish program</p><div className="mt-2 flex flex-wrap gap-2">{p.finish.map(f=><span key={f} className="rounded-full border border-line px-3 py-1.5 text-xs">{f}</span>)}</div></div><div className="mt-8 flex flex-wrap gap-3"><AddToCartButton product={p}/><Link href="/contact" className="button-outline">Request a freight quote</Link></div><div className="mt-7 grid gap-3 text-xs text-ink-soft"><span className="flex items-center gap-2"><Check size={15} className="text-ok"/>Trade-only dealer support</span><span className="flex items-center gap-2"><PackageCheck size={15} className="text-ok"/>Crated and palletized</span><span className="flex items-center gap-2"><Truck size={15} className="text-ok"/>Commercial LTL nationwide</span></div></div></div></Container>;
 }

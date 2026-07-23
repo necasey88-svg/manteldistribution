@@ -1,69 +1,10 @@
 import Link from "next/link";
 import { Container } from "@/components/container";
 import { ProductCard } from "@/components/product-card";
-import { products, type MantelMaterial } from "@/lib/data/products";
-import { cn } from "@/lib/utils";
-import type { Metadata } from "next";
+import { products } from "@/lib/data/products";
 
-export const metadata: Metadata = {
-  title: "Product Catalog",
-  description:
-    "Browse Hearthline Supply Co.'s wholesale precast and wood mantel catalog.",
-};
-
-const FILTERS: { label: string; value: MantelMaterial | "all" }[] = [
-  { label: "All Products", value: "all" },
-  { label: "Precast", value: "precast" },
-  { label: "Wood", value: "wood" },
-];
-
-export default async function ProductsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ material?: string }>;
-}) {
-  const { material } = await searchParams;
-  const active = material === "precast" || material === "wood" ? material : "all";
-
-  const filtered =
-    active === "all" ? products : products.filter((p) => p.material === active);
-
-  return (
-    <Container className="py-16">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-ink">
-            Product Catalog
-          </h1>
-          <p className="mt-2 text-ink-soft max-w-xl">
-            Pricing shown is MSRP for self-serve orders. Sign in to your
-            dealer account for net pricing and purchase order tools.
-          </p>
-        </div>
-
-        <div className="flex gap-2">
-          {FILTERS.map((f) => (
-            <Link
-              key={f.value}
-              href={f.value === "all" ? "/products" : `/products?material=${f.value}`}
-              className={cn(
-                "rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
-                active === f.value
-                  ? "bg-ink text-white border-ink"
-                  : "border-line text-ink-soft hover:border-ink hover:text-ink"
-              )}
-            >
-              {f.label}
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filtered.map((product) => (
-          <ProductCard key={product.slug} product={product} />
-        ))}
-      </div>
-    </Container>
-  );
+export default async function ProductsPage({searchParams}:{searchParams:Promise<{style?:string}>}) {
+  const {style}=await searchParams; const active=style==="contemporary"||style==="traditional"?style:"all";
+  const filtered=active==="all"?products:products.filter(p=>p.style===active);
+  return <><section className="page-hero"><Container><p className="eyebrow text-clay">Dealer launch collection · 10 SKUs</p><h1 className="mt-4 font-serif text-5xl text-white sm:text-6xl">The Hearthline Ten</h1><p className="mt-5 max-w-2xl text-lg leading-8 text-white/65">A concentrated precast program selected for style coverage, merchandising clarity, and repeatable nationwide fulfillment.</p></Container></section><Container className="py-14"><div className="mb-10 flex flex-col gap-5 border-b border-line pb-7 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-sm text-ink-soft">Recommended launch pricing shown. Freight is quoted separately.</p><p className="mt-1 text-xs text-ink-soft">Dealer price / suggested retail · {filtered.length} products</p></div><div className="flex gap-2">{[["all","All 10"],["contemporary","Contemporary"],["traditional","Traditional"]].map(([value,label])=><Link key={value} href={value==="all"?"/products":`/products?style=${value}`} className={`filter-pill ${active===value?"active":""}`}>{label}</Link>)}</div></div><div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{filtered.map(p=><ProductCard key={p.slug} product={p}/>)}</div><div className="mt-10 rounded-sm bg-cream p-6 text-sm text-ink-soft"><strong className="text-ink">Pricing note:</strong> These are recommended introductory dealer and retail prices, designed to yield approximately 47–50% gross margin before freight. Final pricing should be approved after product cost, crating, and dealer terms are confirmed.</div></Container></>;
 }

@@ -3,13 +3,13 @@ import { Container } from "./container";
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-line bg-steel-dark text-paper mt-24">
+    <footer className="border-t border-line bg-steel-dark text-paper">
       <Container className="py-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <span className="font-semibold tracking-tight text-lg">Hearthline Supply Co.</span>
           <p className="mt-3 text-sm text-paper/70 leading-relaxed">
-            Wholesale precast and wood mantel distribution, shipped nationwide
-            to fireplace dealers, retailers, and trade accounts.
+            A focused precast mantel collection, shipped nationwide to
+            fireplace dealers, contractors, designers, and trade accounts.
           </p>
         </div>
 
@@ -18,9 +18,9 @@ export function SiteFooter() {
             Catalog
           </h3>
           <ul className="mt-4 space-y-2 text-sm text-paper/80">
-            <li><Link href="/products?material=precast" className="hover:text-white">Precast Mantels</Link></li>
-            <li><Link href="/products?material=wood" className="hover:text-white">Wood Mantels</Link></li>
-            <li><Link href="/products" className="hover:text-white">Full Catalog</Link></li>
+            <li><Link href="/products?style=contemporary" className="hover:text-white">Contemporary</Link></li>
+            <li><Link href="/products?style=traditional" className="hover:text-white">Traditional</Link></li>
+            <li><Link href="/products" className="hover:text-white">The Hearthline Ten</Link></li>
           </ul>
         </div>
 
@@ -32,6 +32,7 @@ export function SiteFooter() {
             <li><Link href="/become-a-dealer" className="hover:text-white">Become a Dealer</Link></li>
             <li><Link href="/dealer/login" className="hover:text-white">Dealer Login</Link></li>
             <li><Link href="/shipping-freight" className="hover:text-white">Shipping & Freight</Link></li>
+            <li><Link href="/brochure" className="hover:text-white">Trade Brochure</Link></li>
           </ul>
         </div>
 

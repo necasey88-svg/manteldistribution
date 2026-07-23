@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getStripe } from "@/lib/stripe";
+import { getProductBySlug } from "@/lib/data/products";
 
+// Clients send only slug + qty; unit pricing is resolved server-side
+// from the catalog so a tampered request can't set its own price.
 const CheckoutSchema = z.object({
   lines: z
     .array(
       z.object({
         slug: z.string(),
-        name: z.string(),
-        sku: z.string(),
-        priceCents: z.number().int().positive(),
         qty: z.number().int().positive(),
       })
     )
@@ -28,6 +28,34 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const lineItems = [];
+  for (const line of parsed.data.lines) {
+    const product = getProductBySlug(line.slug);
+    if (!product) {
+      return NextResponse.json(
+        { error: `Unknown product: ${line.slug}` },
+        { status: 400 }
+      );
+    }
+    if (!product.inStock) {
+      return NextResponse.json(
+        { error: `${product.name} is made to order — contact us to purchase.` },
+        { status: 400 }
+      );
+    }
+    lineItems.push({
+      quantity: line.qty,
+      price_data: {
+        currency: "usd",
+        unit_amount: product.msrpCents,
+        product_data: {
+          name: product.name,
+          metadata: { sku: product.sku, slug: product.slug },
+        },
+      },
+    });
+  }
+
   const origin = request.headers.get("origin") ?? request.nextUrl.origin;
 
   try {
@@ -36,17 +64,7 @@ export async function POST(request: NextRequest) {
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       customer_email: parsed.data.email,
-      line_items: parsed.data.lines.map((line) => ({
-        quantity: line.qty,
-        price_data: {
-          currency: "usd",
-          unit_amount: line.priceCents,
-          product_data: {
-            name: line.name,
-            metadata: { sku: line.sku, slug: line.slug },
-          },
-        },
-      })),
+      line_items: lineItems,
       shipping_address_collection: { allowed_countries: ["US", "CA"] },
       success_url: `${origin}/order-confirmation?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/products`,

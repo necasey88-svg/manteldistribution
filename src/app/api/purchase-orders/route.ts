@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { getProductBySku } from "@/lib/data/products";
 
+// Clients send only sku + qty; unit pricing is resolved server-side
+// from the catalog so a tampered request can't set its own price.
 const PurchaseOrderSchema = z.object({
   lines: z
     .array(
       z.object({
         sku: z.string(),
-        name: z.string(),
         qty: z.number().int().positive(),
-        unitPriceCents: z.number().int().nonnegative(),
       })
     )
     .min(1),
@@ -54,7 +55,24 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const subtotalCents = parsed.data.lines.reduce(
+  const pricedLines = [];
+  for (const line of parsed.data.lines) {
+    const product = getProductBySku(line.sku);
+    if (!product) {
+      return NextResponse.json(
+        { error: `Unknown product SKU: ${line.sku}` },
+        { status: 400 }
+      );
+    }
+    pricedLines.push({
+      sku: product.sku,
+      name: product.name,
+      qty: line.qty,
+      unitPriceCents: product.priceCents,
+    });
+  }
+
+  const subtotalCents = pricedLines.reduce(
     (sum, l) => sum + l.unitPriceCents * l.qty,
     0
   );
@@ -81,7 +99,7 @@ export async function POST(request: NextRequest) {
   const { error: lineItemsError } = await supabase
     .from("purchase_order_line_items")
     .insert(
-      parsed.data.lines.map((l) => ({
+      pricedLines.map((l) => ({
         purchase_order_id: po.id,
         product_sku: l.sku,
         product_name: l.name,

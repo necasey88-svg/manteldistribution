@@ -22,10 +22,10 @@ export default function BecomeADealerPage() {
         </p>
         <ul className="mt-5 space-y-3 text-sm text-ink-soft">
           {[
-            "Dealer net pricing on the full precast and wood catalog",
+            "Dealer net pricing on the focused ten-mantel collection",
             "A purchase order portal for standing and one-off orders",
             "Net payment terms based on account volume",
-            "Freight-optimized nationwide LTL shipping",
+            "Finish samples, line-review support, and nationwide LTL shipping",
           ].map((item) => (
             <li key={item} className="flex gap-2">
               <span className="text-ember-dark">&#8226;</span>
