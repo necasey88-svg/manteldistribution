@@ -14,7 +14,6 @@ const ApplicationSchema = z.object({
   startedAt: z.number().int().positive(),
 });
 
-const APPLICATION_INBOX = "hearthlinesupply@calmantel.com";
 const MINIMUM_COMPLETION_TIME_MS = 2500;
 
 const businessTypeLabels: Record<string, string> = {
@@ -55,50 +54,59 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const submission = new FormData();
-    submission.set(
-      "_subject",
-      `New Hearthline dealer application — ${parsed.data.companyName}`
-    );
-    submission.set("_template", "table");
-    submission.set("_captcha", "false");
-    submission.set("Company Name", parsed.data.companyName);
-    submission.set("Contact Name", parsed.data.contactName);
-    submission.set("Email", parsed.data.email);
-    submission.set("Phone", parsed.data.phone || "Not provided");
-    submission.set(
-      "Business Type",
-      businessTypeLabels[parsed.data.businessType] || parsed.data.businessType
-    );
-    submission.set("Website", parsed.data.website || "Not provided");
-    submission.set(
-      "Expected Monthly Volume",
-      parsed.data.expectedVolume || "Not provided"
-    );
-    submission.set("Additional Information", parsed.data.message || "None");
-    submission.set(
-      "Submitted At",
-      new Date().toLocaleString("en-US", {
+    const accessKey = process.env.WEB3FORMS_ACCESS_KEY;
+
+    if (!accessKey) {
+      console.error("WEB3FORMS_ACCESS_KEY is not configured");
+      return NextResponse.json(
+        {
+          error:
+            "We couldn’t send your application. Please try again or email our trade team.",
+        },
+        { status: 503 }
+      );
+    }
+
+    const submission = {
+      access_key: accessKey,
+      subject: `New Hearthline dealer application — ${parsed.data.companyName}`,
+      from_name: "Hearthline Supply Website",
+      email: parsed.data.email,
+      replyto: parsed.data.email,
+      botcheck: false,
+      "Company Name": parsed.data.companyName,
+      "Contact Name": parsed.data.contactName,
+      Phone: parsed.data.phone || "Not provided",
+      "Business Type":
+        businessTypeLabels[parsed.data.businessType] || parsed.data.businessType,
+      Website: parsed.data.website || "Not provided",
+      "Expected Monthly Volume":
+        parsed.data.expectedVolume || "Not provided",
+      "Additional Information": parsed.data.message || "None",
+      "Submitted At": new Date().toLocaleString("en-US", {
         dateStyle: "long",
         timeStyle: "short",
         timeZone: "America/Los_Angeles",
-      })
-    );
+      }),
+    };
 
     const delivery = await fetch(
-      `https://formsubmit.co/ajax/${encodeURIComponent(APPLICATION_INBOX)}`,
+      "https://api.web3forms.com/submit",
       {
         method: "POST",
-        headers: { Accept: "application/json" },
-        body: submission,
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(submission),
         cache: "no-store",
       }
     );
 
     const result = await delivery.json().catch(() => null);
 
-    if (!delivery.ok || result?.success === false) {
-      console.error("dealer application email delivery failed", result);
+    if (!delivery.ok || result?.success !== true) {
+      console.error("Web3Forms dealer application delivery failed", result);
       return NextResponse.json(
         {
           error:
