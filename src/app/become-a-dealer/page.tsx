@@ -41,7 +41,9 @@ export default function BecomeADealerPage() {
       </div>
 
       <div className="lg:col-span-3 rounded-md border border-line bg-white p-6 sm:p-8">
-        <DealerApplicationForm />
+        <DealerApplicationForm
+          accessKey={process.env.WEB3FORMS_ACCESS_KEY ?? ""}
+        />
       </div>
     </Container>
   );

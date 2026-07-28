@@ -4,7 +4,14 @@ import Link from "next/link";
 import { ArrowRight, CheckCircle2, LoaderCircle, ShieldCheck } from "lucide-react";
 import { useRef, useState, type FormEvent } from "react";
 
-export function DealerApplicationForm() {
+const businessTypeLabels: Record<string, string> = {
+  fireplace_dealer: "Fireplace / Hearth Dealer",
+  home_furnishings_retailer: "Home Furnishings Retailer",
+  builder_remodeler: "Builder / Remodeler",
+  other: "Other",
+};
+
+export function DealerApplicationForm({ accessKey }: { accessKey: string }) {
   const startedAt = useRef(Date.now());
   const [status, setStatus] = useState<
     "idle" | "submitting" | "success" | "error"
@@ -17,7 +24,7 @@ export function DealerApplicationForm() {
     setErrorMessage(null);
 
     const form = new FormData(event.currentTarget);
-    const payload = {
+    const application = {
       companyName: String(form.get("companyName") ?? ""),
       contactName: String(form.get("contactName") ?? ""),
       email: String(form.get("email") ?? ""),
@@ -27,19 +34,55 @@ export function DealerApplicationForm() {
       expectedVolume: String(form.get("expectedVolume") ?? ""),
       message: String(form.get("message") ?? ""),
       companyFax: String(form.get("companyFax") ?? ""),
-      startedAt: startedAt.current,
     };
 
     try {
-      const response = await fetch("/api/dealer-applications", {
+      if (
+        application.companyFax ||
+        Date.now() - startedAt.current < 2500
+      ) {
+        setStatus("success");
+        return;
+      }
+
+      if (!accessKey) {
+        throw new Error("The application service is temporarily unavailable.");
+      }
+
+      const submission = {
+        access_key: accessKey,
+        subject: `New Hearthline dealer application — ${application.companyName}`,
+        from_name: "Hearthline Supply Website",
+        email: application.email,
+        replyto: application.email,
+        botcheck: application.companyFax,
+        "Company Name": application.companyName,
+        "Contact Name": application.contactName,
+        Phone: application.phone || "Not provided",
+        "Business Type":
+          businessTypeLabels[application.businessType] ||
+          application.businessType,
+        Website: application.website || "Not provided",
+        "Expected Monthly Volume":
+          application.expectedVolume || "Not provided",
+        "Additional Information": application.message || "None",
+      };
+
+      const response = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(submission),
       });
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error ?? "Submission failed");
+      if (!response.ok || data.success !== true) {
+        throw new Error(
+          data.message ??
+            "We couldn’t send your application. Please try again."
+        );
       }
 
       setStatus("success");
