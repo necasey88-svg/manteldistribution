@@ -9,7 +9,8 @@ import { createClient } from "@/lib/supabase/client";
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get("next") ?? "/dealer/dashboard";
+  const requestedNext = searchParams.get("next") ?? "/dealer/dashboard";
+  const next = requestedNext.startsWith("/") ? requestedNext : "/dealer/dashboard";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -83,7 +84,14 @@ function LoginForm() {
         </button>
       </form>
 
-      <p className="mt-6 text-sm text-ink-soft">
+      <div className="mt-5 flex items-center justify-between gap-4 text-sm">
+        <Link href="/dealer/forgot-password" className="text-ember-dark underline underline-offset-2">
+          Forgot password?
+        </Link>
+        <span className="text-ink-soft">Invitation-only access</span>
+      </div>
+
+      <p className="mt-6 border-t border-line pt-6 text-sm text-ink-soft">
         Not a dealer yet?{" "}
         <Link href="/become-a-dealer" className="underline hover:text-ember-dark">
           Apply for an account

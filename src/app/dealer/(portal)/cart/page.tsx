@@ -10,6 +10,10 @@ import { formatCurrency } from "@/lib/utils";
 export default function DealerCartPage() {
   const { lines, updateQty, removeLine, subtotalCents, clear } = useDealerCart();
   const [notes, setNotes] = useState("");
+  const [dealerPoNumber, setDealerPoNumber] = useState("");
+  const [jobName, setJobName] = useState("");
+  const [shipTo, setShipTo] = useState("");
+  const [requestedShipDate, setRequestedShipDate] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -32,12 +36,16 @@ export default function DealerCartPage() {
             unitPriceCents: l.priceCents,
           })),
           notes: notes || undefined,
+          dealerPoNumber: dealerPoNumber || undefined,
+          jobName: jobName || undefined,
+          shipTo: shipTo || undefined,
+          requestedShipDate: requestedShipDate || undefined,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Could not submit purchase order");
       clear();
-      router.push("/dealer/purchase-orders?submitted=" + data.poNumber);
+      router.push("/dealer/orders?submitted=" + data.poNumber);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not submit purchase order");
     } finally {
@@ -105,7 +113,28 @@ export default function DealerCartPage() {
           on the order acknowledgment after submission.
         </p>
 
-        <label className="mt-5 block text-xs font-medium text-ink-soft uppercase tracking-wide">
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <label className="block text-xs font-medium text-ink-soft uppercase tracking-wide">
+            Your PO number
+            <input value={dealerPoNumber} onChange={(e)=>setDealerPoNumber(e.target.value)} placeholder="Optional" className="mt-1 w-full rounded-sm border border-line px-3 py-2 text-sm font-normal normal-case tracking-normal text-ink" />
+          </label>
+          <label className="block text-xs font-medium text-ink-soft uppercase tracking-wide">
+            Job name
+            <input value={jobName} onChange={(e)=>setJobName(e.target.value)} placeholder="Customer or project" className="mt-1 w-full rounded-sm border border-line px-3 py-2 text-sm font-normal normal-case tracking-normal text-ink" />
+          </label>
+        </div>
+
+        <label className="mt-4 block text-xs font-medium text-ink-soft uppercase tracking-wide">
+          Ship-to address
+          <textarea value={shipTo} onChange={(e)=>setShipTo(e.target.value)} rows={3} placeholder="Commercial receiving address" className="mt-1 w-full rounded-sm border border-line px-3 py-2 text-sm font-normal normal-case tracking-normal text-ink" />
+        </label>
+
+        <label className="mt-4 block text-xs font-medium text-ink-soft uppercase tracking-wide">
+          Requested ship date
+          <input type="date" value={requestedShipDate} onChange={(e)=>setRequestedShipDate(e.target.value)} className="mt-1 w-full rounded-sm border border-line px-3 py-2 text-sm font-normal normal-case tracking-normal text-ink" />
+        </label>
+
+        <label className="mt-4 block text-xs font-medium text-ink-soft uppercase tracking-wide">
           PO notes (optional)
         </label>
         <textarea

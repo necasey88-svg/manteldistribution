@@ -1,6 +1,5 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+const nextConfig = {
+  experimental: process.env.NEXT_TEST_WASM_DIR ? { cpus: 2 } : {},
   // Serve images as static files — the Vercel Hobby team's image-optimization
   // quota is exhausted, so /_next/image returns 402. Source JPEGs are
   // pre-sized to 1200px for the web instead.

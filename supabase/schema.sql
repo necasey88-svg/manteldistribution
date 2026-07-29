@@ -15,8 +15,21 @@ create table if not exists dealers (
   phone text,
   status text not null default 'pending' check (status in ('pending', 'approved', 'rejected')),
   net_terms_days integer not null default 0,
+  account_number text,
+  pricing_tier text not null default 'approved'
+    check (pricing_tier in ('approved', 'stocking', 'program', 'national')),
+  discount_bps integer not null default 0 check (discount_bps between 0 and 1500),
+  billing_address text,
+  shipping_address text,
+  resale_certificate_status text not null default 'needed'
+    check (resale_certificate_status in ('needed', 'received', 'verified')),
+  sales_rep text,
+  approved_at timestamptz,
   created_at timestamptz not null default now()
 );
+create unique index if not exists dealers_email_unique on dealers (email);
+create unique index if not exists dealers_account_number_unique
+  on dealers (account_number) where account_number is not null;
 
 -- Public "Become a Dealer" applications land here before an admin
 -- provisions a Supabase Auth user + approved `dealers` row.
@@ -61,8 +74,19 @@ create table if not exists purchase_orders (
   dealer_id uuid not null references dealers (id) on delete cascade,
   po_number text not null unique,
   status text not null default 'submitted'
-    check (status in ('submitted', 'approved', 'in_production', 'shipped', 'cancelled')),
+    check (status in ('submitted', 'freight_quoted', 'dealer_approved', 'in_production', 'quality_check', 'shipped', 'delivered', 'cancelled')),
   subtotal_cents integer not null,
+  freight_cents integer,
+  dealer_po_number text,
+  job_name text,
+  ship_to text,
+  requested_ship_date date,
+  estimated_ship_date date,
+  carrier text,
+  tracking_number text,
+  bol_url text,
+  acknowledgment_url text,
+  invoice_url text,
   notes text,
   created_at timestamptz not null default now()
 );
@@ -72,8 +96,23 @@ create table if not exists purchase_order_line_items (
   purchase_order_id uuid not null references purchase_orders (id) on delete cascade,
   product_sku text not null references products (sku),
   product_name text not null,
+  finish text,
+  color text,
+  hearth text,
   qty integer not null check (qty > 0),
   unit_price_cents integer not null
+);
+
+-- Private production translation. No dealer-facing RLS policy is created
+-- for this table, so Calmantel manufacturing names stay on the backend.
+create table if not exists manufacturing_order_lines (
+  id uuid primary key default gen_random_uuid(),
+  purchase_order_line_item_id uuid not null references purchase_order_line_items (id) on delete cascade,
+  manufacturing_model text not null,
+  manufacturing_finish text not null,
+  manufacturing_color text,
+  manufacturing_hearth text not null,
+  created_at timestamptz not null default now()
 );
 
 -- Self-serve Stripe checkout orders (public site + dealer "buy now").
@@ -105,6 +144,7 @@ alter table purchase_order_line_items enable row level security;
 alter table orders enable row level security;
 alter table order_line_items enable row level security;
 alter table products enable row level security;
+alter table manufacturing_order_lines enable row level security;
 
 -- Products are readable by anyone (public catalog).
 create policy "products are publicly readable"
@@ -126,7 +166,10 @@ create policy "dealers can read own purchase orders"
 create policy "dealers can insert own purchase orders"
   on purchase_orders for insert
   with check (
-    dealer_id in (select id from dealers where user_id = auth.uid())
+    dealer_id in (
+      select id from dealers
+      where user_id = auth.uid() and status = 'approved'
+    )
   );
 
 create policy "dealers can read own po line items"

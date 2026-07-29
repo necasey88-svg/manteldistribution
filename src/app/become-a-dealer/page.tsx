@@ -35,15 +35,13 @@ export default function BecomeADealerPage() {
         </ul>
         <p className="mt-8 text-sm text-ink-soft">
           Applications are typically reviewed within 1&ndash;2 business
-          days. Once approved, we&apos;ll email you credentials for the
-          dealer portal.
+          days. Once approved, we&apos;ll email a secure invitation so you
+          can create your dealer-portal password.
         </p>
       </div>
 
       <div className="lg:col-span-3 rounded-md border border-line bg-white p-6 sm:p-8">
-        <DealerApplicationForm
-          accessKey={process.env.WEB3FORMS_ACCESS_KEY ?? ""}
-        />
+        <DealerApplicationForm />
       </div>
     </Container>
   );

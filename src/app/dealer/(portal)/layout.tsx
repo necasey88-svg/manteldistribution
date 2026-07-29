@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { DealerCartProvider } from "@/lib/dealer-cart-context";
 import { DealerNav } from "@/components/dealer/dealer-nav";
-import { Container } from "@/components/container";
 
 export default async function DealerPortalLayout({
   children,
@@ -22,22 +21,21 @@ export default async function DealerPortalLayout({
 
   const { data: dealer } = await supabase
     .from("dealers")
-    .select("company_name, status")
+    .select("*")
     .eq("user_id", user.id)
     .single();
 
+  if (!dealer) {
+    redirect("/dealer/account-status?state=missing");
+  }
+
+  if (dealer.status !== "approved") {
+    redirect(`/dealer/account-status?state=${dealer.status}`);
+  }
+
   return (
     <DealerCartProvider>
-      <DealerNav companyName={dealer?.company_name ?? undefined} />
-      {dealer && dealer.status !== "approved" && (
-        <div className="bg-warn/10 text-warn text-sm">
-          <Container className="py-2">
-            Your dealer account is <strong>{dealer.status}</strong>. You can
-            browse dealer pricing, but purchase order submission is disabled
-            until your account is approved.
-          </Container>
-        </div>
-      )}
+      <DealerNav companyName={dealer.company_name} />
       {children}
     </DealerCartProvider>
   );

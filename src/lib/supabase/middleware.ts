@@ -33,7 +33,9 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const isDealerRoute = path.startsWith("/dealer") && path !== "/dealer/login";
+  const publicDealerRoutes = ["/dealer/login", "/dealer/forgot-password"];
+  const isDealerRoute =
+    path.startsWith("/dealer") && !publicDealerRoutes.includes(path);
 
   if (isDealerRoute && !user) {
     const redirectUrl = request.nextUrl.clone();

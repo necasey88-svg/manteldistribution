@@ -8,9 +8,8 @@ import { cn } from "@/lib/utils";
 const LINKS = [
   { href: "/dealer/dashboard", label: "Dashboard" },
   { href: "/dealer/catalog", label: "Catalog" },
-  { href: "/dealer/cart", label: "PO Cart" },
-  { href: "/dealer/purchase-orders", label: "Purchase Orders" },
-  { href: "/dealer/orders", label: "Order History" },
+  { href: "/dealer/cart", label: "Order Builder" },
+  { href: "/dealer/orders", label: "Orders" },
   { href: "/dealer/account", label: "Account" },
 ];
 

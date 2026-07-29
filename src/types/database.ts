@@ -14,6 +14,14 @@ export interface Database {
           phone: string | null;
           status: "pending" | "approved" | "rejected";
           net_terms_days: number;
+          account_number: string | null;
+          pricing_tier: "approved" | "stocking" | "program" | "national";
+          discount_bps: number;
+          billing_address: string | null;
+          shipping_address: string | null;
+          resale_certificate_status: "needed" | "received" | "verified";
+          sales_rep: string | null;
+          approved_at: string | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["dealers"]["Row"]>;
@@ -25,8 +33,27 @@ export interface Database {
           id: string;
           dealer_id: string;
           po_number: string;
-          status: "submitted" | "approved" | "in_production" | "shipped" | "cancelled";
+          status:
+            | "submitted"
+            | "freight_quoted"
+            | "dealer_approved"
+            | "in_production"
+            | "quality_check"
+            | "shipped"
+            | "delivered"
+            | "cancelled";
           subtotal_cents: number;
+          freight_cents: number | null;
+          dealer_po_number: string | null;
+          job_name: string | null;
+          ship_to: string | null;
+          requested_ship_date: string | null;
+          estimated_ship_date: string | null;
+          carrier: string | null;
+          tracking_number: string | null;
+          bol_url: string | null;
+          acknowledgment_url: string | null;
+          invoice_url: string | null;
           notes: string | null;
           created_at: string;
         };
@@ -40,6 +67,9 @@ export interface Database {
           purchase_order_id: string;
           product_sku: string;
           product_name: string;
+          finish: string | null;
+          color: string | null;
+          hearth: string | null;
           qty: number;
           unit_price_cents: number;
         };
@@ -112,6 +142,20 @@ export interface Database {
         };
         Insert: Partial<Database["public"]["Tables"]["order_line_items"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["order_line_items"]["Row"]>;
+        Relationships: [];
+      };
+      manufacturing_order_lines: {
+        Row: {
+          id: string;
+          purchase_order_line_item_id: string;
+          manufacturing_model: string;
+          manufacturing_finish: string;
+          manufacturing_color: string | null;
+          manufacturing_hearth: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["manufacturing_order_lines"]["Row"]>;
+        Update: Partial<Database["public"]["Tables"]["manufacturing_order_lines"]["Row"]>;
         Relationships: [];
       };
     };
