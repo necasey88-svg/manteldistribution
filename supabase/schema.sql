@@ -94,7 +94,9 @@ create table if not exists purchase_orders (
 create table if not exists purchase_order_line_items (
   id uuid primary key default gen_random_uuid(),
   purchase_order_id uuid not null references purchase_orders (id) on delete cascade,
-  product_sku text not null references products (sku),
+  -- product_sku is stored as text (the code catalog in src/lib/data/products.ts
+  -- is the source of truth, not the products table), so no FK to products here.
+  product_sku text not null,
   product_name text not null,
   finish text,
   color text,
@@ -130,7 +132,7 @@ create table if not exists orders (
 create table if not exists order_line_items (
   id uuid primary key default gen_random_uuid(),
   order_id uuid not null references orders (id) on delete cascade,
-  product_sku text not null references products (sku),
+  product_sku text not null,
   product_name text not null,
   qty integer not null check (qty > 0),
   unit_price_cents integer not null
