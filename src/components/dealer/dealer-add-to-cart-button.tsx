@@ -44,7 +44,7 @@ export function DealerAddToCartButton({
     </div>
     <div className="flex items-center gap-2">
       <input aria-label="Quantity" type="number" min={product.minOrderQty} value={qty} onChange={e=>setQty(Number(e.target.value))} className="w-16 rounded-sm border border-line px-2 py-1.5 text-sm"/>
-      <button type="button" onClick={()=>{addLine({lineKey,slug:product.slug,name:product.name,sku:product.sku,priceCents:configuredPrice,finish,color,hearth},qty);setAdded(true);setTimeout(()=>setAdded(false),1500)}} className="flex-1 inline-flex items-center justify-center rounded-sm bg-steel-dark px-4 py-1.5 text-sm font-semibold text-white hover:bg-ink">{added?"Added to PO":"Add to PO"}</button>
+      <button type="button" onClick={()=>{addLine({lineKey,slug:product.slug,name:product.name,sku:product.sku,priceCents:configuredPrice,finish,color,hearth},qty);setAdded(true);setTimeout(()=>setAdded(false),2200)}} className={`flex-1 inline-flex items-center justify-center rounded-sm px-4 py-1.5 text-sm font-semibold text-white transition-colors ${added?"bg-ok":"bg-steel-dark hover:bg-ink"}`}>{added?"✓ Added — see Order Builder":"Add to PO"}</button>
     </div>
   </div>;
 }

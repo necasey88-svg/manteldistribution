@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { useDealerCart } from "@/lib/dealer-cart-context";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
@@ -16,6 +17,8 @@ const LINKS = [
 export function DealerNav({ companyName }: { companyName?: string }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { lines } = useDealerCart();
+  const cartCount = lines.reduce((sum, line) => sum + line.qty, 0);
 
   async function handleSignOut() {
     const supabase = createClient();
@@ -33,13 +36,18 @@ export function DealerNav({ companyName }: { companyName?: string }) {
               key={link.href}
               href={link.href}
               className={cn(
-                "px-3 py-1.5 rounded-sm font-medium whitespace-nowrap transition-colors",
+                "px-3 py-1.5 rounded-sm font-medium whitespace-nowrap transition-colors inline-flex items-center gap-1.5",
                 pathname === link.href
                   ? "bg-paper-dim text-ink"
                   : "text-ink-soft hover:text-ink"
               )}
             >
               {link.label}
+              {link.href === "/dealer/cart" && cartCount > 0 && (
+                <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-ember text-white text-[10px] font-bold leading-none">
+                  {cartCount}
+                </span>
+              )}
             </Link>
           ))}
         </nav>
